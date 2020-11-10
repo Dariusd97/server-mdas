@@ -19,7 +19,7 @@ const tables = {
 }
 
 
-sequelize.sync({alter: true})
+sequelize.sync()
     .then()
     .catch((error) => console.warn(error))
     

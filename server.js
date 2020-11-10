@@ -11,3 +11,5 @@ app.use(bodyParser.json());
 app.use("/user", userRoutes)
 
 app.listen(8081, () => { console.log('Server is running on port 8081')})
+
+module.exports = app;
