@@ -16,8 +16,12 @@ const sequelize = new Sequelize(database, username, password, {
 
 const tables = {
     User : require('/Users/dadobre/Desktop/server-mdas/models/user')(sequelize),
+    ShoppingItem: require('/Users/dadobre/Desktop/server-mdas/models/shoppingItem')(sequelize),
+    FavoriteItem: require('/Users/dadobre/Desktop/server-mdas/models/favoriteItem')(sequelize)
 }
 
+tables.User.hasMany(tables.ShoppingItem);
+tables.User.hasMany(tables.FavoriteItem);
 
 sequelize.sync()
     .then()

@@ -19,8 +19,7 @@ router.post('/create', async(req, res, next) => {
                 await tables['User'].create({ 
                     username: req.body.username, 
                     password: passwordHash , 
-                    firstName: req.body.firstName, 
-                    lastName: req.body.lastName,
+                    name: req.body.name, 
                     address: req.body.address
                 })
                 res.status(201).json({
