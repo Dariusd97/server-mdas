@@ -5,7 +5,7 @@ const Sequelize = require("sequelize")
 
 module.exports = (sequelize, DataTypes) => {
     const ShoppingItem = sequelize.define("shoppingItems", {
-        price: {
+        totalPrice: {
             type: Sequelize.DOUBLE,
         },
         quantity: {
@@ -14,12 +14,16 @@ module.exports = (sequelize, DataTypes) => {
         title: {
             type: Sequelize.STRING(255)
         },
-        author: {
+        authors: {
             type: Sequelize.STRING(255)
         },
-        image: {
+        imageBook: {
+            type: Sequelize.STRING(255)
+        },
+        initialPrice: {
             type: Sequelize.STRING(255)
         }
+
     });
     return ShoppingItem;
 }

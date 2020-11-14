@@ -10,6 +10,6 @@ const userRoutes = require('/Users/dadobre/Desktop/server-mdas/routes/userRoute.
 app.use(bodyParser.json());
 app.use("/user", userRoutes)
 
-app.listen(8082, () => { console.log('Server is running on port 8081')})
+app.listen(8081, () => { console.log('Server is running on port 8081')})
 
 module.exports = app;

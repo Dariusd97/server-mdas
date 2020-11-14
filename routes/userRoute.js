@@ -57,11 +57,7 @@ router.get("/login", async(req, res, next) => {
                 if (user) {
                     const existsPasswordMatch = bcrypt.compareSync(req.query.password, user['dataValues']['password'])
                     if (existsPasswordMatch) {
-                        res.status(200).json({
-                            Message: "User exists",
-                            statusCode: 200
-
-                        })
+                        res.status(200).json(user)
                     }
                     else {
                         res.status(404).json({
@@ -125,37 +121,8 @@ router.get('/recoverPassword', async(req, res, next) => {
     }
 })
 
-// create list
-router.post('/:userEmail/createList', async(req, res, next) => {
-    try {
-        await tables['User'].findOne({
-            where: {
-                username: req.params.userEmail
-            }
-        }).then(user => {
-            if (user) {
-                tables['List'].create({ name: req.body.name, userId: user.id })
-                    .then(() => {
-                        res.status(200).json({ Message: "Resource created" })
-                    })
-                    .catch(err => {
-                        console.warn(err)
-                        res.status(500).json({ Message: "Server error" })
-                    })
-            }
-            else {
-                res.status(404).json({ Message: "Username doesn't exists" })
-            }
-        })
-    }
-    catch (error) {
-        console.warn(error)
-        res.status(500).json({ Message: "Server error" })
-    }
-})
-
-// get all list of one user
-router.get("/:userEmail/getAllLists", async(req, res, next) => {
+// get all shopping items of one user from shopping list
+router.get("/:userEmail/shoppingItem", async(req, res, next) => {
     try{
         await tables['User'].findOne({
             where : {
@@ -163,16 +130,16 @@ router.get("/:userEmail/getAllLists", async(req, res, next) => {
             }
         }).then(user => {
             if(user){
-                tables['List'].findAll({
-                    where : {
-                        userId : user.id    
+                tables.ShoppingItem.findAll({
+                    where: {
+                        userId : user.id
                     }
-                }).then(lists => {
-                    if(lists){
-                        res.status(200).json({lists : lists})
-                    }else{
-                        res.status(404).json({Message : "Resource doesn't exists"})
-                    }
+                }).then(items => {
+                    let array = [];
+                    for (var i = 0 ; i < items.length; i++) {
+                        array.push(items[i].dataValues)
+                    }                    
+                    res.status(200).json(array);
                 })
             }else{
                 res.status(404).json({Message : "Username doesn't exists"})
@@ -184,8 +151,8 @@ router.get("/:userEmail/getAllLists", async(req, res, next) => {
     }
 })
 
-// add product to list
-router.post('/:userEmail/addProduct/:listId/:productId', async(req, res, next) => {
+// add shopping item to shopping list
+router.post('/:userEmail/shoppingItem/add', async(req, res, next) => {
     try {
         await tables['User'].findOne({
             where: {
@@ -193,22 +160,17 @@ router.post('/:userEmail/addProduct/:listId/:productId', async(req, res, next) =
             }
         }).then(user => {
             if (user) {
-                tables['List'].findByPk(req.params.listId)
-                    .then(list => {
-                        if (list) {
-                            tables['RowListLaptop'].create({ listId: list.id, laptopId: req.params.productId })
-                                .then(() => {
-                                    res.status(200).json({ Message: "Resource created" })
-                                })
-                                .catch(err => {
-                                    console.warn(err)
-                                    res.status(500).json({ Message: "Server error" })
-                                })
-                        }
-                        else {
-                            res.status(404).json({ Message: "List doesn't exists" })
-                        }
-                    })
+                tables.ShoppingItem.create({
+                    totalPrice: req.body.totalPrice,
+                    quantity: req.body.quantity,
+                    title: req.body.title,
+                    authors: req.body.authors,
+                    imageBook: req.body.imageBook,
+                    initialPrice: req.body.initialPrice,
+                    userId: user.id
+                }).then(() => {
+                    res.status(200).json({ Message: "Resource created" })
+                });
             }
             else {
                 res.status(404).json({ Message: "Username doesn't exists" })
@@ -221,63 +183,71 @@ router.post('/:userEmail/addProduct/:listId/:productId', async(req, res, next) =
     }
 })
 
-// delete product from list
-router.delete("/:userEmail/removeProduct/:listId/:productId", async(req, res, next) => {
+// update multiple shopping items to shopping list
+router.put('/:userEmail/shoppingItem/updateAll', async(req, res, next) => {
+    try {
+        await tables['User'].findOne({
+            where: {
+                username: req.params.userEmail
+            }
+        }).then(async(user) => {
+            if (user) {
+                //console.log(req.body)
+                console.log(user.id)
+                let list = req.body
+                // console.log(array)
+                // console.log("*******************")
+                
+                for(var j = 0; j < list.length; j++) {
+                    console.log("$()$()$()$()$()$()$()$()$()$()")
+                    console.log(list[j])
+                    await tables.ShoppingItem.update(list[j]
+                    , 
+                    {
+                        where: 
+                        {
+                            userId: user.id
+                        }
+                    });
+                }
+                
+                console.log("------------")
+                res.status(200).json(list)
+                
+            }
+            else {
+                res.status(404).json({ Message: "Username doesn't exists" })
+            }
+        })
+    }
+    catch (error) {
+        console.warn(error)
+        res.status(500).json({ Message: "Server error" })
+    }
+})
+
+// delete shopping item from shopping list
+router.delete("/:userEmail/shoppingItem/remove/:itemTitle", async(req, res, next) => {
     await tables['User'].findOne({
         where : {
             username : req.params.userEmail
         }
     }).then(user => {
         if(user){
-            tables['List'].findByPk(req.params.listId)
-                .then(list => {
-                    if(list){
-                        tables['RowListLaptop'].destroy({where : {listId: list.id, laptopId: req.params.productId}})
-                            .then(() => {
-                                res.status(200).json({Message : "Resource deleted"})
-                            })
-                    }else{
-                        res.status(404).json({Message : "List doesn't exists"})
-                    }
-                })
+            tables.ShoppingItem.destroy({
+                where: {
+                    title: req.params.itemTitle
+                }
+            }).then(() => {
+                res.status(200).json({Message : "Resource deleted"})
+            })
+
         }else{
             res.status(404).json({Message : "Username doesn't exists"});
         }
     })
 })
 
-
-// create list and add product to it
-router.post('/:userEmail/createList/addProduct/:productId', async(req, res, next) => {
-    try {
-        await tables['User'].findOne({
-            where: {
-                username: req.params.userEmail
-            }
-        }).then(user => {
-            if (user) {
-                tables['List'].create({name : req.body.name, userId : user.id})
-                    .then(list => {
-                        tables['RowListLaptop'].create({ listId: list.id, laptopId: req.params.productId })
-                                .then(() => {
-                                    res.status(200).json({ Message: "Resource created" })
-                                })
-                                .catch(err => {
-                                    console.warn(err)
-                                    res.status(500).json({ Message: "Server error" })
-                                })
-                    })
-            }
-            else {
-                res.status(404).json({ Message: "Username doesn't exists" })
-            }
-        })
-    }
-    catch (error) {
-        console.warn(error)
-        res.status(500).json({ Message: "Server error" })
-    }
-})
 // get all lists and products for one user
 router.get('/:userEmail/lists', async(req, res, next) => {
     try {
@@ -313,47 +283,5 @@ router.get('/:userEmail/lists', async(req, res, next) => {
         res.status(500).json({ Message: "Server error" })
     }
 })
-
-// delete list from user
-router.delete('/:userEmail/:listId', async(req, res, status) => {
-    try {
-        await tables['User'].findOne({
-            where : {
-                username : req.params.userEmail
-            }
-        }).then(user => {
-            if(user){
-                tables['List'].findOne({where : {userId : user.id , id : req.params.listId}}, {include : [{model : tables['Laptop']}]} ).then(list => {
-                    if(list){
-                        list.destroy();
-                        res.status(200).json({Message : "Succes"})
-                    }else{
-                        res.status(404).json({Message : "List doesn't exists"})
-                    }
-                })
-            }else{
-                res.status(404).json({Message : "Username doesn't exists"})
-            }
-        })
-    }
-    catch (error) {
-        console.warn(error);
-        res.status(500).json({ Message: "Server error" })
-    }
-})
-
-
-async function sendMail(toEmail) {
-    var data = {
-        from: "My Nodejs Application <postmaster@sandbox433482a392a049d290753ae57509a2e6.mailgun.org>",
-        to: `<${toEmail}>`,
-        subject: 'Test Mail',
-        text: 'You are truly awesome!'
-    };
-
-    mailgun.messages().send(data, function(error, body) {
-        console.log(body);
-    });
-}
 
 module.exports = router
