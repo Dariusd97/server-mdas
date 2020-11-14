@@ -151,6 +151,61 @@ router.get("/:userEmail/shoppingItem", async(req, res, next) => {
     }
 })
 
+// get all favorite items of one user from favorite list
+router.get("/:userEmail/favoriteItem", async(req, res, next) => {
+    try{
+        await tables['User'].findOne({
+            where : {
+                username : req.params.userEmail
+            }
+        }).then(user => {
+            if(user){
+                tables.FavoriteItem.findAll({
+                    where: {
+                        userId : user.id
+                    }
+                }).then(items => {
+                    let array = [];
+                    for (var i = 0 ; i < items.length; i++) {
+                        array.push(items[i].dataValues)
+                    }                    
+                    res.status(200).json(array);
+                })
+            }else{
+                res.status(404).json({Message : "Username doesn't exists"})
+            }
+        })
+    }catch(error){
+        console.warn(error)
+        res.status(500).json({Message : "Server error"})
+    }
+})
+
+// update user settings 
+router.put("/:userEmail/userInfo", async(req, res, next) => {
+    try{
+        await tables['User'].findOne({
+            where : {
+                username : req.params.userEmail
+            }
+        }).then(async(user) => {
+            if(user){
+                user.update({
+                    username: req.body.username,
+                    name: req.body.name,
+                    address: req.body.address
+                });
+                res.status(200).json(user)
+            }else{
+                res.status(404).json({Message : "Username doesn't exists"})
+            }
+        })
+    }catch(error){
+        console.warn(error)
+        res.status(500).json({Message : "Server error"})
+    }
+})
+
 // add shopping item to shopping list
 router.post('/:userEmail/shoppingItem/add', async(req, res, next) => {
     try {
@@ -183,6 +238,40 @@ router.post('/:userEmail/shoppingItem/add', async(req, res, next) => {
     }
 })
 
+// add favorite item to favoriteItem list
+router.post('/:userEmail/favoriteItem/add', async(req, res, next) => {
+    try {
+        await tables['User'].findOne({
+            where: {
+                username: req.params.userEmail
+            }
+        }).then(user => {
+            console.lo
+            if (user) {
+                console.log(req.body)
+                tables.FavoriteItem.create({
+                    title: req.body.title,
+                    authors: req.body.authors,
+                    thumbnail: req.body.thumbnail,
+                    publishedDate: req.body.publishedDate,
+                    price: req.body.price,
+                    description: req.body.description,
+                    userId: user.id
+                }).then(() => {
+                    res.status(200).json("Resource created")
+                });
+            }
+            else {
+                res.status(404).json({ Message: "Username doesn't exists" })
+            }
+        })
+    }
+    catch (error) {
+        console.warn(error)
+        res.status(500).json({ Message: "Server error" })
+    }
+})
+
 // update multiple shopping items to shopping list
 router.put('/:userEmail/shoppingItem/updateAll', async(req, res, next) => {
     try {
@@ -192,26 +281,16 @@ router.put('/:userEmail/shoppingItem/updateAll', async(req, res, next) => {
             }
         }).then(async(user) => {
             if (user) {
-                //console.log(req.body)
-                console.log(user.id)
                 let list = req.body
-                // console.log(array)
-                // console.log("*******************")
-                
+            
                 for(var j = 0; j < list.length; j++) {
-                    console.log("$()$()$()$()$()$()$()$()$()$()")
-                    console.log(list[j])
-                    await tables.ShoppingItem.update(list[j]
-                    , 
-                    {
-                        where: 
-                        {
-                            userId: user.id
-                        }
+                    await tables.ShoppingItem.findOne({where: {title: list[j].title}}).then(item => {
+                        item.update({
+                            quantity: list[j].quantity,
+                            totalPrice: list[j].totalPrice
+                        });
                     });
                 }
-                
-                console.log("------------")
                 res.status(200).json(list)
                 
             }
@@ -234,12 +313,36 @@ router.delete("/:userEmail/shoppingItem/remove/:itemTitle", async(req, res, next
         }
     }).then(user => {
         if(user){
+            console.log("Delete shopping item")
             tables.ShoppingItem.destroy({
                 where: {
                     title: req.params.itemTitle
                 }
             }).then(() => {
-                res.status(200).json({Message : "Resource deleted"})
+                res.status(200).json("Resource deleted")
+            })
+
+        }else{
+            res.status(404).json({Message : "Username doesn't exists"});
+        }
+    })
+})
+
+// delete favorite item from favorite list
+router.delete("/:userEmail/favoriteItem/remove/:itemTitle", async(req, res, next) => {
+    await tables['User'].findOne({
+        where : {
+            username : req.params.userEmail
+        }
+    }).then(user => {
+        if(user){
+            console.log("Delete favorite item")
+            tables.FavoriteItem.destroy({
+                where: {
+                    title: req.params.itemTitle
+                }
+            }).then(() => {
+                res.status(200).json("Resource deleted")
             })
 
         }else{

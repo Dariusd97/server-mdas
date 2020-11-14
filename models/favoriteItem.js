@@ -8,20 +8,35 @@ module.exports = (sequelize, DataTypes) => {
         title: {
             type: Sequelize.STRING(255)
         },
-        author: {
+        authors: {
             type: Sequelize.STRING(255)
         },
-        publishDate: {
+        publishedDate: {
             type: Sequelize.STRING(255)
         },
-        category: {
+        categories: {
             type: Sequelize.STRING(255)
         },
-        image: {
+        thumbnail: {
             type: Sequelize.STRING(255)
         },
         price: {
-            type: Sequelize.DOUBLE
+            type: Sequelize.STRING(255)
+        },
+        description: {
+            type: Sequelize.TEXT 
+        },
+        buy: {
+            type: Sequelize.STRING(255)
+        },
+        preview: {
+            type: Sequelize.STRING(255)
+        },
+        url: {
+            type: Sequelize.STRING(255)
+        },
+        pageCount: {
+            type: Sequelize.INTEGER
         }
     });
     return FavoriteItem;
