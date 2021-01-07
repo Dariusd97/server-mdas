@@ -1,7 +1,7 @@
 const Router = require("router")
-const database = require("/Users/dadobre/Desktop/server-mdas/database.js")
+const database = require("../database.js")
 const router = Router()
-const { sequelize } = require("/Users/dadobre/Desktop/server-mdas/database.js");
+const { sequelize } = require("../database.js");
 const DataTypes = sequelize.DataTypes;
 const tables = database.tables
 
@@ -9,10 +9,14 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 
-//create one user
+// create one user
 router.post('/create', async(req, res, next) => {
     try {
-        if (req.body.username && req.body.username !== null && req.body.username !== '' && req.body.password && req.body.password !== null && req.body.password !== '') {
+        if (req.body.username && req.body.username !== null && 
+            req.body.username !== '' && 
+            req.body.password && 
+            req.body.password !== null && 
+            req.body.password !== '') {
             let response = await tables.User.findOne({ where: { username: req.body.username } })
             if (response == null) {
                 const passwordHash = bcrypt.hashSync(req.body.password, saltRounds);

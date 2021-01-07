@@ -2,7 +2,7 @@ const Sequelize = require("sequelize")
 
 const database = process.env.database || 'mdas'
 const username = process.env.username || 'root'
-const password = process.env.password || 'hpq19061997'
+const password = process.env.password || '12345678'
 const hostname = process.env.hostname || 'localhost'
 
 const sequelize = new Sequelize(database, username, password, {
@@ -15,9 +15,9 @@ const sequelize = new Sequelize(database, username, password, {
 })
 
 const tables = {
-    User : require('/Users/dadobre/Desktop/server-mdas/models/user')(sequelize),
-    ShoppingItem: require('/Users/dadobre/Desktop/server-mdas/models/shoppingItem')(sequelize),
-    FavoriteItem: require('/Users/dadobre/Desktop/server-mdas/models/favoriteItem')(sequelize)
+    User : require('./models/user')(sequelize),
+    ShoppingItem: require('./models/shoppingItem')(sequelize),
+    FavoriteItem: require('./models/favoriteItem')(sequelize)
 }
 
 tables.User.hasMany(tables.ShoppingItem);

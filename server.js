@@ -5,7 +5,7 @@ const app = express();
 
 const port = process.env.PORT || 3000
 
-const userRoutes = require('/Users/dadobre/Desktop/server-mdas/routes/userRoute.js')
+const userRoutes = require('./routes/userRoute.js')
 
 app.use(bodyParser.json());
 app.use("/user", userRoutes)

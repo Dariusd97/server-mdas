@@ -14,7 +14,7 @@ describe('Users', () => {
     after(() => { 
         tables.User.destroy({
             where: {
-                username: 'ax@gmail.com'
+                username: 'x@gmail.com'
             }
         });
     });
@@ -46,15 +46,15 @@ describe('Users', () => {
   describe('/GET user', () => {
       it('it should check that a user exist', (done) => {
         chai.request(server)
-            .get("/user/login?username=a@gmail.com&password=test")
+            .get("/user/login?username=d@gmai.com&password=1")
             .end((err, res) => {
                   res.should.have.status(200);
-                  res.body.should.have.property('Message').eql('User exists');
               done();
             });
       });
   });
 
 });
+
 
 
