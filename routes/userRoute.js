@@ -250,9 +250,7 @@ router.post('/:userEmail/favoriteItem/add', async(req, res, next) => {
                 username: req.params.userEmail
             }
         }).then(user => {
-            console.lo
             if (user) {
-                console.log(req.body)
                 tables.FavoriteItem.create({
                     title: req.body.title,
                     authors: req.body.authors,
